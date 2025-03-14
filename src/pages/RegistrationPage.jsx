@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import backgroundImage from "../images/img1.jpg";
+import backgroundImage from "../images/img1.jpg"; // Same as Welcome Page
 
 const RegistrationPage = () => {
   const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [physicalAddress, setPhysicalAddress] = useState("");
+  const [phoneOrEmail, setPhoneOrEmail] = useState("");
+  const [dob, setDob] = useState("");
   const [nationalId, setNationalId] = useState("");
   const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
@@ -44,7 +43,7 @@ const RegistrationPage = () => {
         {step === 1 && (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block font-semibold">Full Names</label>
+              <label className="block font-semibold">Full Name</label>
               <input
                 type="text"
                 value={fullName}
@@ -55,39 +54,29 @@ const RegistrationPage = () => {
             </div>
 
             <div>
-              <label className="block font-semibold">Email (Optional)</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-3 border-2 border-blue-500 shadow-sm rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block font-semibold">Phone Number</label>
-              <input
-                type="tel"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                className="w-full p-3 border-2 border-blue-500 shadow-sm rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block font-semibold">Physical Address</label>
+              <label className="block font-semibold">Phone Number or Email</label>
               <input
                 type="text"
-                value={physicalAddress}
-                onChange={(e) => setPhysicalAddress(e.target.value)}
+                value={phoneOrEmail}
+                onChange={(e) => setPhoneOrEmail(e.target.value)}
                 className="w-full p-3 border-2 border-blue-500 shadow-sm rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none"
                 required
               />
             </div>
 
             <div>
-              <label className="block font-semibold">National ID</label>
+              <label className="block font-semibold">Date of Birth</label>
+              <input
+                type="date"
+                value={dob}
+                onChange={(e) => setDob(e.target.value)}
+                className="w-full p-3 border-2 border-blue-500 shadow-sm rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block font-semibold">National ID / Insurance Number</label>
               <input
                 type="text"
                 value={nationalId}
@@ -114,8 +103,8 @@ const RegistrationPage = () => {
                 type="text"
                 value={pin}
                 onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, "");
-                  if (value.length <= 4) setPin(value);
+                  const value = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
+                  if (value.length <= 4) setPin(value); // Restrict to 4 digits
                 }}
                 className="w-full p-3 border-2 border-blue-500 shadow-sm rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none text-center"
                 maxLength={4}
@@ -131,8 +120,8 @@ const RegistrationPage = () => {
                 type="text"
                 value={confirmPin}
                 onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, "");
-                  if (value.length <= 4) setConfirmPin(value);
+                  const value = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
+                  if (value.length <= 4) setConfirmPin(value); // Restrict to 4 digits
                 }}
                 className="w-full p-3 border-2 border-blue-500 shadow-sm rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none text-center"
                 maxLength={4}
