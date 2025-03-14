@@ -1,4 +1,3 @@
-// src/App.jsx
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import WelcomePage from './pages/WelcomePage';
@@ -6,12 +5,12 @@ import RegistrationPage from './pages/RegistrationPage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import ForgotPinPage from './pages/ForgotPinPage';
-import WalletPage from './pages/WalletPage'; // Create this page
-import InsurancePage from './pages/InsurancePage'; // Create this page
-import MedicalLoansPage from './pages/MedicalLoansPage'; // Create this page
-import TelemedicinePage from './pages/TelemedicinePage'; // Create this page
-import ProfilePage from './pages/ProfilePage'; // Create this page
-import SettingsPage from './pages/SettingsPage'; // Create this page
+import WalletPage from './pages/WalletPage';
+import InsurancePage from './pages/InsurancePage';
+import MedicalLoansPage from './pages/MedicalLoansPage';
+import TelemedicinePage from './pages/TelemedicinePage';
+import ProfilePage from './pages/ProfilePage';
+import SettingsPage from './pages/SettingsPage';
 
 const App = () => {
   return (
@@ -22,6 +21,7 @@ const App = () => {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-pin" element={<ForgotPinPage />} />
         <Route path="/dashboard" element={<DashboardPage />}>
+          <Route index element={<div className="p-4">Welcome to your dashboard!</div>} />
           <Route path="wallet" element={<WalletPage />} />
           <Route path="insurance" element={<InsurancePage />} />
           <Route path="medical-loans" element={<MedicalLoansPage />} />
