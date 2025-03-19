@@ -21,7 +21,6 @@ const App = () => {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-pin" element={<ForgotPinPage />} />
         <Route path="/dashboard" element={<DashboardPage />}>
-          <Route index element={<div className="p-4">Welcome to your dashboard!</div>} />
           <Route path="wallet" element={<WalletPage />} />
           <Route path="insurance" element={<InsurancePage />} />
           <Route path="medical-loans" element={<MedicalLoansPage />} />
