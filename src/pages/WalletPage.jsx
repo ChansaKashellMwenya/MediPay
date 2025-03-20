@@ -11,6 +11,8 @@ import {
   FaQrcode,
   FaHandHoldingUsd,
   FaReceipt,
+  FaArrowDown,
+  FaArrowUp,
 } from "react-icons/fa";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -107,6 +109,24 @@ const WalletPage = () => {
   // Sorting State
   const [sortBy, setSortBy] = useState("date"); // Default sorting by date
   const [sortOrder, setSortOrder] = useState("asc"); // Default ascending order
+
+  // Deposit State
+  const [depositAmount, setDepositAmount] = useState("");
+  const [depositMethod, setDepositMethod] = useState("mobileMoney");
+  const [depositMobileMoneyNumber, setDepositMobileMoneyNumber] = useState("");
+  const [depositMobileWalletProvider, setDepositMobileWalletProvider] = useState("");
+  const [depositCardNumber, setDepositCardNumber] = useState("");
+  const [depositCardExpiry, setDepositCardExpiry] = useState("");
+  const [depositCardCVC, setDepositCardCVC] = useState("");
+  const [depositCardholderName, setDepositCardholderName] = useState("");
+
+  // Withdraw State
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [withdrawMethod, setWithdrawMethod] = useState("mobileMoney");
+  const [withdrawMobileMoneyNumber, setWithdrawMobileMoneyNumber] = useState("");
+  const [withdrawMobileWalletProvider, setWithdrawMobileWalletProvider] = useState("");
+  const [withdrawBankAccountNumber, setWithdrawBankAccountNumber] = useState("");
+  const [withdrawBankName, setWithdrawBankName] = useState("");
 
   // Handle paying medical bills
   const handlePayBill = () => {
@@ -220,6 +240,122 @@ const WalletPage = () => {
     alert("Card added successfully!");
   };
 
+  // Handle depositing money into the wallet
+  const handleDeposit = () => {
+    if (depositAmount <= 0) {
+      alert("Please enter a valid deposit amount.");
+      return;
+    }
+
+    let depositDetails = {};
+    switch (depositMethod) {
+      case "mobileMoney":
+        if (!depositMobileMoneyNumber || !depositMobileWalletProvider) {
+          alert("Please fill in all mobile money details.");
+          return;
+        }
+        depositDetails = {
+          method: "Mobile Money",
+          provider: depositMobileWalletProvider,
+          number: depositMobileMoneyNumber,
+        };
+        break;
+      case "card":
+        if (!depositCardNumber || !depositCardExpiry || !depositCardCVC || !depositCardholderName) {
+          alert("Please fill in all card details.");
+          return;
+        }
+        depositDetails = {
+          method: "Debit/Credit Card",
+          cardholderName: depositCardholderName,
+          cardNumber: depositCardNumber,
+          expiry: depositCardExpiry,
+          cvc: depositCardCVC,
+        };
+        break;
+      default:
+        alert("Please select a valid deposit method.");
+        return;
+    }
+
+    const newTransaction = {
+      id: transactions.length + 1,
+      type: "Deposit",
+      amount: parseFloat(depositAmount),
+      method: depositDetails.method,
+      status: "Completed",
+      timestamp: new Date().toLocaleString(),
+      date: new Date().toLocaleDateString(),
+    };
+
+    setTransactions([...transactions, newTransaction]);
+    setBalance((prevBalance) => prevBalance + parseFloat(depositAmount));
+    setDepositAmount("");
+    setDepositMobileMoneyNumber("");
+    setDepositMobileWalletProvider("");
+    setDepositCardNumber("");
+    setDepositCardExpiry("");
+    setDepositCardCVC("");
+    setDepositCardholderName("");
+    alert("Deposit successful!");
+  };
+
+  // Handle withdrawing money from the wallet
+  const handleWithdraw = () => {
+    if (withdrawAmount <= 0 || withdrawAmount > balance) {
+      alert("Invalid amount or insufficient balance.");
+      return;
+    }
+
+    let withdrawDetails = {};
+    switch (withdrawMethod) {
+      case "mobileMoney":
+        if (!withdrawMobileMoneyNumber || !withdrawMobileWalletProvider) {
+          alert("Please fill in all mobile money details.");
+          return;
+        }
+        withdrawDetails = {
+          method: "Mobile Money",
+          provider: withdrawMobileWalletProvider,
+          number: withdrawMobileMoneyNumber,
+        };
+        break;
+      case "bankTransfer":
+        if (!withdrawBankAccountNumber || !withdrawBankName) {
+          alert("Please fill in all bank details.");
+          return;
+        }
+        withdrawDetails = {
+          method: "Bank Transfer",
+          bankName: withdrawBankName,
+          accountNumber: withdrawBankAccountNumber,
+        };
+        break;
+      default:
+        alert("Please select a valid withdrawal method.");
+        return;
+    }
+
+    const newTransaction = {
+      id: transactions.length + 1,
+      type: "Withdrawal",
+      amount: parseFloat(withdrawAmount),
+      method: withdrawDetails.method,
+      status: "Pending",
+      timestamp: new Date().toLocaleString(),
+      date: new Date().toLocaleDateString(),
+    };
+
+    setTransactions([...transactions, newTransaction]);
+    setBalance((prevBalance) => prevBalance - parseFloat(withdrawAmount));
+    setWithdrawAmount("");
+    setWithdrawMobileMoneyNumber("");
+    setWithdrawMobileWalletProvider("");
+    setWithdrawBankAccountNumber("");
+    setWithdrawBankName("");
+    alert("Withdrawal request submitted successfully!");
+  };
+
   // Render the main wallet balance card
   const renderWalletBalanceCard = () => {
     const connectedCard = connectedCards[0]; // Only one card is allowed
@@ -227,11 +363,11 @@ const WalletPage = () => {
     return (
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 rounded-lg shadow-lg text-white">
         <h2 className="text-xl font-semibold mb-4">Wallet Balance</h2>
-        <p className="text-4xl font-bold">${balance.toFixed(2)}</p>
+        <p className="text-4xl font-bold">ZMW{balance.toFixed(2)}</p>
         <p className="text-gray-200 mt-2">Current wallet balance</p>
         <div className="mt-4 flex justify-between items-center">
           <div>
-            <p className="text-sm text-gray-200">Card Number</p>
+            <p className="text-sm text-gray-200">Wallet Number</p>
             <p className="text-lg font-medium">
               {connectedCard ? `**** **** **** ${connectedCard.cardNumber}` : "**** **** **** 1234"}
             </p>
@@ -742,6 +878,204 @@ const WalletPage = () => {
             </div>
           </div>
         );
+      case "deposit":
+        return (
+          <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Deposit Money</h2>
+            <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Amount</label>
+                <input
+                  type="number"
+                  value={depositAmount}
+                  onChange={(e) => setDepositAmount(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter deposit amount"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Deposit Method</label>
+                <select
+                  value={depositMethod}
+                  onChange={(e) => setDepositMethod(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="mobileMoney">Mobile Money</option>
+                  <option value="card">Debit/Credit Card</option>
+                </select>
+              </div>
+
+              {/* Mobile Money Fields */}
+              {depositMethod === "mobileMoney" && (
+                <>
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Mobile Wallet Provider</label>
+                    <input
+                      type="text"
+                      value={depositMobileWalletProvider}
+                      onChange={(e) => setDepositMobileWalletProvider(e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter mobile wallet provider (e.g., MTN Mobile Money)"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Mobile Money Number</label>
+                    <input
+                      type="text"
+                      value={depositMobileMoneyNumber}
+                      onChange={(e) => setDepositMobileMoneyNumber(e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter mobile money number"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Card Fields */}
+              {depositMethod === "card" && (
+                <>
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Cardholder Name</label>
+                    <input
+                      type="text"
+                      value={depositCardholderName}
+                      onChange={(e) => setDepositCardholderName(e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter cardholder name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Card Number</label>
+                    <input
+                      type="text"
+                      value={depositCardNumber}
+                      onChange={(e) => setDepositCardNumber(e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter 16-digit card number"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-2">Expiration Date</label>
+                      <input
+                        type="text"
+                        value={depositCardExpiry}
+                        onChange={(e) => setDepositCardExpiry(e.target.value)}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="MM/YY"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-2">CVV Code</label>
+                      <input
+                        type="text"
+                        value={depositCardCVC}
+                        onChange={(e) => setDepositCardCVC(e.target.value)}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter 3-digit CVV"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <button
+                onClick={handleDeposit}
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white p-3 rounded-lg hover:from-blue-600 hover:to-purple-600 transition duration-300"
+              >
+                Deposit Money
+              </button>
+            </div>
+          </div>
+        );
+      case "withdraw":
+        return (
+          <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Withdraw Money</h2>
+            <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Amount</label>
+                <input
+                  type="number"
+                  value={withdrawAmount}
+                  onChange={(e) => setWithdrawAmount(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter withdrawal amount"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Withdrawal Method</label>
+                <select
+                  value={withdrawMethod}
+                  onChange={(e) => setWithdrawMethod(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="mobileMoney">Mobile Money</option>
+                  <option value="bankTransfer">Bank Transfer</option>
+                </select>
+              </div>
+
+              {/* Mobile Money Fields */}
+              {withdrawMethod === "mobileMoney" && (
+                <>
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Mobile Wallet Provider</label>
+                    <input
+                      type="text"
+                      value={withdrawMobileWalletProvider}
+                      onChange={(e) => setWithdrawMobileWalletProvider(e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter mobile wallet provider (e.g., MTN Mobile Money)"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Mobile Money Number</label>
+                    <input
+                      type="text"
+                      value={withdrawMobileMoneyNumber}
+                      onChange={(e) => setWithdrawMobileMoneyNumber(e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter mobile money number"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Bank Transfer Fields */}
+              {withdrawMethod === "bankTransfer" && (
+                <>
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Bank Name</label>
+                    <input
+                      type="text"
+                      value={withdrawBankName}
+                      onChange={(e) => setWithdrawBankName(e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter bank name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Bank Account Number</label>
+                    <input
+                      type="text"
+                      value={withdrawBankAccountNumber}
+                      onChange={(e) => setWithdrawBankAccountNumber(e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter bank account number"
+                    />
+                  </div>
+                </>
+              )}
+
+              <button
+                onClick={handleWithdraw}
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white p-3 rounded-lg hover:from-blue-600 hover:to-purple-600 transition duration-300"
+              >
+                Withdraw Money
+              </button>
+            </div>
+          </div>
+        );
       default:
         return <div>Select a tab to view content</div>;
     }
@@ -792,6 +1126,26 @@ const WalletPage = () => {
           onClick={() => setActiveTab("addCard")}
         >
           <FaCreditCard className="mr-2" /> Add Card
+        </button>
+        <button
+          className={`px-4 py-2 font-medium text-sm flex items-center ${
+            activeTab === "deposit"
+              ? "text-blue-600 border-b-2 border-blue-600"
+              : "text-gray-500 hover:text-gray-700"
+          }`}
+          onClick={() => setActiveTab("deposit")}
+        >
+          <FaArrowDown className="mr-2" /> Deposit Money
+        </button>
+        <button
+          className={`px-4 py-2 font-medium text-sm flex items-center ${
+            activeTab === "withdraw"
+              ? "text-blue-600 border-b-2 border-blue-600"
+              : "text-gray-500 hover:text-gray-700"
+          }`}
+          onClick={() => setActiveTab("withdraw")}
+        >
+          <FaArrowUp className="mr-2" /> Withdraw Money
         </button>
       </div>
 
